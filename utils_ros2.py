@@ -77,7 +77,7 @@ class BagFileParser:
                 topics_data.append(new_topic)
             else:
                 new_pose_name = name.replace("/odom", "/pose")
-                new_twist_name = name.replace("/odom", "/twist")
+                new_twist_name = name.replace("/odom", "/speed")
                 data = self.get_messages(name)
                 new_pose_topic = TopicMsgsBag(new_pose_name)
                 new_twist_topic = TopicMsgsBag(new_twist_name)
@@ -133,7 +133,7 @@ class TopicMsgsBag:
             # print("t: ", t)
             # print("initial_t: ", initial_t)
             time = (t - initial_t) * 1e-9
-            print("time", time)
+            # print("time", time)
 
             self.incremental_times.append(time)
 
