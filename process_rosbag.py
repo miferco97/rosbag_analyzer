@@ -11,6 +11,9 @@ def main(args: argparse.Namespace):
 
     data_collection = {}
     interpolated_data = {}
+    if args.namespaces is None:
+        args.namespaces = ['']
+        print('No namespaces provided, reading from the root namespace.')
     for namespace in args.namespaces:
         data = bag.read(topics, namespace=namespace)
         data_collection[namespace] = data
@@ -30,6 +33,10 @@ def main(args: argparse.Namespace):
     for topic, msgs in interpolated_data.items():
         if topic.find('self_localization/pose') != -1:
             plot_data.append(convert_into_plottable_data(msgs))
+
+    if not len(plot_data):
+        print('No data to plot.')
+        return
 
     plot3Dlines(plot_data,labels=list(interpolated_data.keys()))
 
