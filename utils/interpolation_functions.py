@@ -1,7 +1,9 @@
 import numpy as np
 from geometry_msgs.msg import PoseStamped, Point
 from utils.ros2_utils import stamp_to_float, float_to_stamp
+from rosbags.typesys import Stores, get_typestore
 
+typestore = get_typestore(Stores.LATEST)
         
 def check_timestamps(func):
     def wrapper(msg_1, msg_2, t_new: float):
@@ -9,12 +11,10 @@ def check_timestamps(func):
             raise ValueError("x and y must be ros2 messages with a header and a time stamp")
         t1 = stamp_to_float(msg_1.header.stamp)
         t2 = stamp_to_float(msg_2.header.stamp)
-        if t1 == t_new:
+        if t1 >= t_new:
             return msg_1
-        if t2 == t_new:
+        if t2 <= t_new:
             return msg_2
-        if t_new < t1 or t_new > t2:
-            raise ValueError("t_new must be in the interval of x and y")
         return func(msg_1, msg_2, t1, t2, t_new)
     return wrapper
 
@@ -48,12 +48,12 @@ def interpolate_geometry_msgs_PoseStamped(msg_1: PoseStamped, msg_2: PoseStamped
     new_pose = update_header(new_pose, t_new)
     return new_pose
 
-
-
     
 interpolation_catalogue = {
         type(PoseStamped()): interpolate_geometry_msgs_PoseStamped,
-        type(Point()): interpolate_geometry_msgs_Point}
+        typestore.types["geometry_msgs/msg/PoseStamped"]: interpolate_geometry_msgs_PoseStamped,
+        type(Point()): interpolate_geometry_msgs_Point,
+        typestore.types["geometry_msgs/msg/Point"]: interpolate_geometry_msgs_Point}
 
 
 
@@ -64,7 +64,10 @@ def interpolate(msg_1, msg_2, t_new: float):
         raise ValueError(f'Types {type(msg_1)} and {type(msg_2)} must be equal')
     # check if type is in the interpolation catalogue
     if type(msg_1) not in interpolation_catalogue:
+
+        print(f'Avaliable types: {interpolation_catalogue.keys()}')
         raise ValueError(f'Type {type(msg_1)} is not in the interpolation catalogue')
+    
     # get the interpolation 
     interpolation = interpolation_catalogue[type(msg_1)]
     return interpolation(msg_1, msg_2, t_new)
