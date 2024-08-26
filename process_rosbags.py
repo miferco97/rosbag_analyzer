@@ -3,6 +3,11 @@ from operator import pos
 from utils.rosbag_reader import RosbagReader
 from utils.timeseries import interpolate_data, get_time_series
 from utils.plot_functions import *
+import signal
+
+def signal_handler(sig, frame):
+    plt.close()
+    exit(0)
 
 def merge_dicts(dict1, dict2):
     for key, value in dict2.items():
@@ -57,13 +62,19 @@ def main(args: argparse.Namespace):
         print('No data to plot.')
         return
 
-    plot3Dlines(plot_data,labels=list(interpolated_data.keys()))
+    # plot3Dlines(plot_data,labels=list(interpolated_data.keys()),colors=['r','b'])
+    print(f'Plotting {len(plot_data)} topics.')
+    print(f'Plotting {len(plot_data[0])} axis.')
+    print(f'Plotting {len(plot_data[0][0])} points.')
+
+    plot3DlinesBIS(plot_data,labels=list(interpolated_data.keys()),colors=['r','b'])
 
     plt.show()
 
 
 
 if __name__ == '__main__':
+    signal.signal(signal.SIGINT, signal_handler)
     parser = argparse.ArgumentParser(description='Process rosbags and extract data from them, this data can be used for plotting or other purposes.')
     parser.add_argument('bagpath', type=str, nargs='+', help='Paths to the rosbags to process.')
     parser.add_argument('--namespaces', type=str, nargs='+', help='List of namespaces to read topics from.')
