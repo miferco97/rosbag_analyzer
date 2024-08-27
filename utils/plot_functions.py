@@ -7,6 +7,8 @@ from mpl_toolkits.mplot3d import proj3d
 
 from utils.ros2_utils import extract_3d_vector 
 
+from utils.plot_gate import plot_gate
+
 def convert_into_plottable_data(topic_data):
     data = [extract_3d_vector(msg) for msg in topic_data]
     # Extract the data
@@ -80,6 +82,12 @@ def plot3Dlines(lines,projection= None , x_lims= None,y_lims= None,z_lims= None 
         else:
             label = None
         axes.plot(line[0],line[1],line[2],label = label )
+
+
+    GATES = [[1.44, 0.24, 2.03, 1.57], 
+             [-0.5, 0.2, 1.91, 1.57]]
+    
+    plot_gate(GATES, axes)
     
     if x_lims:
         axes.set_xlim3d(x_lims)
